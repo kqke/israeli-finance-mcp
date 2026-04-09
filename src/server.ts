@@ -1,7 +1,51 @@
-import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import { CompanyTypes, createScraper, ScraperOptions, ScraperCredentials, SCRAPERS } from 'israeli-bank-scrapers';
 import { z } from "zod";
+
+const BANK_SCRAPER_ERROR_MESSAGE = "Bank scraper error occurred";
+
+const fetchTransactionsAnnotations: ToolAnnotations = {
+  readOnlyHint: true,
+  destructiveHint: false
+};
+
+const twoFactorAuthAnnotations: ToolAnnotations = {
+  readOnlyHint: false,
+  destructiveHint: false
+};
+
+function getCredentialsForBank(bankId: CompanyTypes): ScraperCredentials {
+  if (bankId !== CompanyTypes.leumi) {
+    throw new Error("Unsupported bank credentials configuration");
+  }
+
+  const username = process.env.LEUMI_USERNAME;
+  const password = process.env.LEUMI_PASSWORD;
+
+  if (!username || !password) {
+    throw new Error("Missing required bank credentials");
+  }
+
+  return {
+    username,
+    password
+  };
+}
+
+function createGenericToolError(errorType = "BANK_SCRAPER_ERROR") {
+  return {
+    content: [{
+      type: "text" as const,
+      text: JSON.stringify({
+        error: errorType,
+        message: BANK_SCRAPER_ERROR_MESSAGE
+      })
+    }],
+    isError: true
+  };
+}
 
 // Create an MCP server
 const server = new McpServer({
@@ -35,21 +79,11 @@ server.tool(
   "fetch-transactions",
   {
     bankId: z.enum(Object.values(CompanyTypes) as [string, ...string[]]),
-    credentials: z.object({
-      username: z.string().optional(),
-      password: z.string(),
-      userCode: z.string().optional(),
-      id: z.string().optional(),
-      num: z.string().optional(),
-      card6Digits: z.string().optional(),
-      nationalID: z.string().optional(),
-      longTermTwoFactorAuthToken: z.string().optional()
-    }),
     startDate: z.string().optional(),
-    combineInstallments: z.boolean().optional(),
-    showBrowser: z.boolean().optional()
+    combineInstallments: z.boolean().optional()
   },
-  async ({ bankId, credentials, startDate, combineInstallments, showBrowser }) => {
+  fetchTransactionsAnnotations,
+  async ({ bankId, startDate, combineInstallments }) => {
     try {
       // Ensure bankId is a valid CompanyTypes value
       const validBankIds = new Set(Object.values(CompanyTypes));
@@ -60,11 +94,11 @@ server.tool(
       const options: ScraperOptions = {
         companyId: bankId as unknown as CompanyTypes,
         startDate: startDate ? new Date(startDate) : new Date(),
-        combineInstallments: combineInstallments ?? false,
-        showBrowser: showBrowser ?? false
+        combineInstallments: combineInstallments ?? false
       };
 
       const scraper = createScraper(options);
+      const credentials = getCredentialsForBank(bankId as unknown as CompanyTypes);
       const scrapeResult = await scraper.scrape(credentials as ScraperCredentials);
 
       if (scrapeResult.success) {
@@ -75,28 +109,10 @@ server.tool(
           }]
         };
       } else {
-        return {
-          content: [{
-            type: "text",
-            text: JSON.stringify({
-              error: scrapeResult.errorType,
-              message: scrapeResult.errorMessage
-            })
-          }],
-          isError: true
-        };
+        return createGenericToolError(scrapeResult.errorType);
       }
-    } catch (error) {
-      return {
-        content: [{
-          type: "text",
-          text: JSON.stringify({
-            error: "UNKNOWN_ERROR",
-            message: error instanceof Error ? error.message : "Unknown error occurred"
-          })
-        }],
-        isError: true
-      };
+    } catch {
+      return createGenericToolError();
     }
   }
 );
@@ -110,6 +126,7 @@ server.tool(
     action: z.enum(["trigger", "get-token"]),
     otpCode: z.string().optional()
   },
+  twoFactorAuthAnnotations,
   async ({ bankId, phoneNumber, action, otpCode }) => {
     try {
       const validBankIds = new Set(Object.values(CompanyTypes));
@@ -141,17 +158,8 @@ server.tool(
       } else {
         throw new Error("Invalid action or missing OTP code");
       }
-    } catch (error) {
-      return {
-        content: [{
-          type: "text",
-          text: JSON.stringify({
-            error: "UNKNOWN_ERROR",
-            message: error instanceof Error ? error.message : "Unknown error occurred"
-          })
-        }],
-        isError: true
-      };
+    } catch {
+      return createGenericToolError();
     }
   }
 );
