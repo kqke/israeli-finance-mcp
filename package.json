@@ -12,8 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "israeli-bank-scrapers": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "israeli-bank-scrapers": "^6.7.3",
     "typescript": "^5.0.0",
     "@types/node": "^20.0.0",
     "ts-node": "^10.0.0",

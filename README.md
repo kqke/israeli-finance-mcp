@@ -31,6 +31,8 @@ The server can be connected to any MCP-compatible client. Here's how to configur
 
 ### Example Configuration
 
+Credentials are read from environment variables (never from tool arguments — this avoids leaking them into the LLM conversation history). Each bank requires `<BANK_ID>_<FIELD>` env vars. For example, Bank Leumi needs `LEUMI_USERNAME` and `LEUMI_PASSWORD`; Hapoalim needs `HAPOALIM_USERCODE` and `HAPOALIM_PASSWORD`. Use the `banks://list` resource to see required env-var names per bank.
+
 For clients that support configuration files (like Claude), add the following to your configuration:
 
 ```json
@@ -40,7 +42,11 @@ For clients that support configuration files (like Claude), add the following to
             "command": "node",
             "args": [
                 "/path/to/israeli-bank-mcp/build/server.js"
-            ]
+            ],
+            "env": {
+                "LEUMI_USERNAME": "your-username",
+                "LEUMI_PASSWORD": "your-password"
+            }
         }
     }
 }
