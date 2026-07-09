@@ -1,6 +1,6 @@
-# Israeli Bank MCP
+# Israeli Finance MCP
 
-A project for managing Israeli bank accounts and transactions using the Model Context Protocol (MCP).
+A project for managing Israeli bank, credit card, and investment accounts using the Model Context Protocol (MCP).
 
 ## Features
 
@@ -39,10 +39,10 @@ For clients that support configuration files (like Claude), add the following to
 ```json
 {
     "mcpServers": {
-        "israeli-bank-mcp": {
+        "israeli-finance-mcp": {
             "command": "node",
             "args": [
-                "/path/to/israeli-bank-mcp/build/server.js"
+                "/path/to/israeli-finance-mcp/build/server.js"
             ],
             "env": {
                 "LEUMI_USERNAME": "your-username",
@@ -67,7 +67,7 @@ security add-generic-password -a "$USER" -s israeli-bank.DISCOUNT_NUM -w
 
 The `-w` flag prompts for the secret interactively so it never appears in your shell history. Add `-U` to update an existing entry. Environment variables, when set, take precedence over Keychain entries.
 
-For platforms with OTP login (see the `otp-login` tool), the long-term token / session is persisted under `~/.israeli-bank-mcp/sessions/` (files `0600`, directory `0700`) so you don't re-authenticate on every fetch.
+For platforms with OTP login (see the `otp-login` tool), the long-term token / session is persisted under `~/.israeli-finance-mcp/sessions/` (files `0600`, directory `0700`) so you don't re-authenticate on every fetch.
 
 ## Resources
 

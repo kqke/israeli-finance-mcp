@@ -1,5 +1,5 @@
 {
-  "name": "israeli-bank-mcp",
+  "name": "israeli-finance-mcp",
   "version": "1.0.0",
   "description": "A project for managing Israeli bank accounts and transactions.",
   "main": "build/server.js",

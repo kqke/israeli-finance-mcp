@@ -61,7 +61,7 @@ function createGenericToolError(errorType = "BANK_SCRAPER_ERROR") {
 }
 
 const server = new McpServer({
-  name: "Israeli Bank MCP",
+  name: "Israeli Finance MCP",
   version: "1.0.0"
 });
 

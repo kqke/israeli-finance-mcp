@@ -4,7 +4,7 @@ import * as path from "path";
 
 // Long-lived login artifacts (OTP long-term tokens, session cookies) are
 // persisted here instead of being returned into the LLM conversation.
-const SESSIONS_DIR = path.join(os.homedir(), ".israeli-bank-mcp", "sessions");
+const SESSIONS_DIR = path.join(os.homedir(), ".israeli-finance-mcp", "sessions");
 
 export type SessionData = Record<string, string>;
 
