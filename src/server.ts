@@ -5,6 +5,7 @@ import { CompanyTypes, createScraper, SCRAPERS } from 'israeli-bank-scrapers';
 import { z } from "zod";
 import { getPlatform, listPlatforms, Platform } from "./registry.js";
 import { loadSession, saveSession, clearSession } from "./sessions.js";
+import { keychainLookup } from "./keychain.js";
 
 const BANK_SCRAPER_ERROR_MESSAGE = "Bank scraper error occurred";
 
@@ -31,7 +32,7 @@ function getCredentialsForPlatform(platform: Platform): Record<string, string> {
 
   for (const field of platform.loginFields) {
     const envName = envVarName(platform.id, field);
-    const value = process.env[envName] ?? session[field];
+    const value = process.env[envName] ?? keychainLookup(envName) ?? session[field];
     if (!value) {
       missing.push(envName);
     } else {

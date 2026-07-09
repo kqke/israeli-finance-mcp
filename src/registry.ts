@@ -1,5 +1,6 @@
 import { CompanyTypes, createScraper, ScraperCredentials, ScraperOptions, SCRAPERS } from 'israeli-bank-scrapers';
 import type { ScraperScrapingResult } from 'israeli-bank-scrapers';
+import { createOrdernetPlatform } from './platforms/ordernet.js';
 
 export interface FetchTransactionsOptions {
   startDate: Date;
@@ -85,7 +86,9 @@ function libraryPlatform(id: CompanyTypes, name: string): Platform | undefined {
 
 // Custom platforms (insurance, brokerage, equity portals) register here.
 // Each entry implements the same Platform interface as the library-backed ones.
-const CUSTOM_PLATFORMS: Platform[] = [];
+const CUSTOM_PLATFORMS: Platform[] = [
+  createOrdernetPlatform("meitavTrade", "Meitav Trade (Spark)", "https://sparkmeitav.ordernet.co.il")
+];
 
 const platforms = new Map<string, Platform>();
 
